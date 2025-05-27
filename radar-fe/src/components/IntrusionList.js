@@ -7,8 +7,8 @@ export default function IntrusionList() {
   useEffect(() => {
     const fetchData = () => {
       const url = filter === "all" 
-        ? "http://localhost:8080/api/radar/intrusions"
-        : `http://localhost:8080/api/radar/intrusions?radarId=${filter}`;
+        ? `${process.env.REACT_APP_API_URL}/api/radar/intrusions`
+        : `${process.env.REACT_APP_API_URL}/api/radar/intrusions?radarId=${filter}`;
 
       fetch(url)
         .then((res) => res.json())

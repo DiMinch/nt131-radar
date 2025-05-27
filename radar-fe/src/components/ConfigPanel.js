@@ -7,7 +7,7 @@ export default function ConfigPanel({ onConfigSaved }) {
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/radar/config")
+    fetch(`${process.env.REACT_APP_API_URL}/api/radar/config`)
       .then(res => res.json())
       .then(cfg => {
         setMaster(cfg.MASTER_NODE_URL || "");
@@ -17,7 +17,7 @@ export default function ConfigPanel({ onConfigSaved }) {
   }, []);
 
   const handleSave = async () => {
-    const res = await fetch("http://localhost:8080/api/radar/config", {
+    const res = await fetch(`${process.env.REACT_APP_API_URL}/api/radar/config`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

@@ -7,7 +7,7 @@ export default function RadarStatsChart() {
   const [data, setData] = useState([]);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/radar/history?limit=1000")
+    fetch(`${process.env.REACT_APP_API_URL}/api/radar/history?limit=1000`)
       .then((res) => res.json())
       .then(setData)
       .catch(() => setData([]));

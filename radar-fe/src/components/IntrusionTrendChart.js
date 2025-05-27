@@ -8,7 +8,7 @@ export default function IntrusionTrendChart() {
   const [mode, setMode] = useState("day");
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/radar/intrusions")
+    fetch(`${process.env.REACT_APP_API_URL}/api/radar/intrusions`)
       .then((res) => res.json())
       .then(setData)
       .catch(() => setData([]));

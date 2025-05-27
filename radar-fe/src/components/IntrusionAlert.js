@@ -4,7 +4,8 @@ export default function IntrusionAlert() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const ws = new WebSocket("ws://localhost:8080");
+    const wsUrl = process.env.REACT_APP_WS_URL || "ws://localhost:8080";
+    const ws = new WebSocket(wsUrl);
     ws.onmessage = (e) => {
       const data = JSON.parse(e.data);
       if (data.isIntrusion) {

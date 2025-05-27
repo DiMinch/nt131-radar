@@ -4,7 +4,7 @@ export default function StatsPanel() {
   const [stats, setStats] = useState({ totalScans: 0, totalIntrusions: 0 });
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/radar/stats")
+    fetch(`${process.env.REACT_APP_API_URL}/api/radar/stats`)
       .then((res) => res.json())
       .then(setStats)
       .catch(() => setStats({ totalScans: 0, totalIntrusions: 0 }));

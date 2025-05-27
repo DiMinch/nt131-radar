@@ -5,7 +5,7 @@ export default function NodeStatus() {
 
   useEffect(() => {
     const fetchStatus = () => {
-      fetch("http://localhost:8080/api/radar/live")
+      fetch(`${process.env.REACT_APP_API_URL}/api/radar/live`)
         .then((res) => res.json())
         .then(setStatus)
         .catch(() => setStatus({ master: null, slave: null }));

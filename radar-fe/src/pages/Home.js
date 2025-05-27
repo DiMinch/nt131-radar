@@ -14,7 +14,8 @@ export default function Home() {
   const wsRef = useRef();
 
   useEffect(() => {
-    wsRef.current = new WebSocket("ws://localhost:8080");
+    const wsUrl = process.env.REACT_APP_WS_URL || "ws://localhost:8080";
+    wsRef.current = new WebSocket(wsUrl);
     wsRef.current.onmessage = (e) => {
       const data = JSON.parse(e.data);
       if (data.radarId === "master") {
@@ -33,7 +34,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:8080/api/radar/config")
+    fetch(`${process.env.REACT_APP_API_URL}/api/radar/config`)
       .then(res => res.json())
       .then(cfg => setThreshold(cfg.DANGER_THRESHOLD || 50));
   }, []);
@@ -46,7 +47,7 @@ export default function Home() {
   }, []);
 
   const reloadThreshold = () => {
-    fetch("http://localhost:8080/api/radar/config")
+    fetch(`${process.env.REACT_APP_API_URL}/api/radar/config`)
       .then(res => res.json())
       .then(cfg => setThreshold(cfg.DANGER_THRESHOLD || 50))
       .catch(() => setThreshold(50));
