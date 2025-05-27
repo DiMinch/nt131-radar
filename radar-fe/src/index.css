@@ -1,0 +1,15 @@
+body {
+    font-family: 'Orbitron', monospace;
+    background: linear-gradient(120deg, #001f1f 0%, #003333 100%);
+    background-size: 200% 200%;
+    animation: bgmove 10s ease-in-out infinite;
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+@keyframes bgmove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
