@@ -1,0 +1,23 @@
+{
+  "scripts": {
+    "start": "node src/index.js",
+    "mock": "node src/mocksv.js",
+    "dev": "nodemon src/index.js",
+    "test": "node src/test-radar-api.js"
+  },
+  "dependencies": {
+    "axios": "^1.9.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "firebase": "^11.8.1",
+    "firebase-admin": "^13.4.0",
+    "jest": "^29.7.0",
+    "node-fetch": "^3.3.2",
+    "nodemailer": "^7.0.3",
+    "nodemon": "^3.1.10",
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0",
+    "ws": "^8.18.2"
+  }
+}
