@@ -4,9 +4,9 @@
 #include <Servo.h>
 #include <ArduinoJson.h>
 
-#define TRIG_PIN 4
-#define ECHO_PIN 14
-#define SERVO_PIN 5
+#define TRIG_PIN D6
+#define ECHO_PIN D5
+#define SERVO_PIN D4
 
 ESP8266WebServer server(80);
 const char* ssid = "FamilyMart";

@@ -11,7 +11,7 @@ export default function NodeStatus() {
         .catch(() => setStatus({ master: null, slave: null }));
     };
     fetchStatus();
-    const interval = setInterval(fetchStatus, 3000);
+    const interval = setInterval(fetchStatus, 300);
     return () => clearInterval(interval);
   }, []);
 
@@ -29,7 +29,6 @@ export default function NodeStatus() {
         <>
           <div>Angle: <b>{node.angle}°</b></div>
           <div>Distance: <b>{node.distance} cm</b></div>
-          <div>Time: <b>{node.timestamp?.replace("T"," ").slice(0,19)}</b></div>
           <div style={{color:"#00ff66"}}>Status: Active</div>
         </>
       ) : (

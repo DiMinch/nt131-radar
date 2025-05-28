@@ -27,11 +27,11 @@ export default function ConfigPanel({ onConfigSaved }) {
         })
       });
       if (res.ok) {
-        setMsg("Đã lưu cấu hình!");
+        setMsg("Saved!");
         if (onConfigSaved) onConfigSaved();
         setTimeout(() => setMsg(""), 2000);
       }
-      else setMsg("Lỗi lưu cấu hình!");
+      else setMsg("Error!");
       setTimeout(() => setMsg(""), 2000);
     };
 

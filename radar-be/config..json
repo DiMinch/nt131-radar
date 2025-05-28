@@ -1,5 +1,0 @@
-{
-    "MASTER_NODE_URL": "http://localhost:3001",
-    "SLAVE_NODE_URL": "http://localhost:3001",
-    "DANGER_THRESHOLD": 50
-}

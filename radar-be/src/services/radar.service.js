@@ -66,7 +66,34 @@ exports.getCurrentReadings = async () => {
     const slaveUrl = getConfigValue("SLAVE_NODE_URL", "http://localhost:3001") + "/data";
     const masterData = await fetchWithTimeout(masterUrl);
     const slaveData = await fetchWithTimeout(slaveUrl);
-    return { master: masterData, slave: slaveData };
+
+    // --- NEW: Xử lý intrusion và broadcast ---
+    const DANGER_THRESHOLD = Number(getConfigValue("DANGER_THRESHOLD", 50));
+    const now = new Date().toISOString();
+
+    // Helper để xử lý và lưu intrusion
+    async function handleScan(data, radarId) {
+      if (!data) return null;
+      const scanData = {
+        angle: data.angle,
+        distance: data.distance,
+        timestamp: now,
+        radarId,
+        isIntrusion: data.distance < DANGER_THRESHOLD
+      };
+      ws.broadcast(scanData);
+      await db.collection("radar_scans").add(scanData);
+      if (scanData.isIntrusion) {
+        await db.collection("intrusion_logs").add(scanData);
+        await sendAlertMail(scanData);
+      }
+      return scanData;
+    }
+
+    const masterScan = await handleScan(masterData, "master");
+    const slaveScan = await handleScan(slaveData, "slave");
+
+    return { master: masterScan, slave: slaveScan };
   } catch (e) {
     return { master: null, slave: null };
   }
