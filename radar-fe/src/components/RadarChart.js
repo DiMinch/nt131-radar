@@ -8,7 +8,6 @@ export default function RadarChart({ data, sweepAngle, threshold = 50 }) {
     const r = 200;
     ctx.clearRect(0, 0, 400, 400);
 
-    // Vẽ nền radar
     ctx.save();
     ctx.translate(r, r);
     ctx.strokeStyle = "#00ffcc";
@@ -20,7 +19,6 @@ export default function RadarChart({ data, sweepAngle, threshold = 50 }) {
     }
     ctx.globalAlpha = 1;
 
-    // Vẽ vòng đỏ cảnh báo
     ctx.beginPath();
     ctx.arc(0, 0, (threshold / 200) * r, 0, 2 * Math.PI);
     ctx.strokeStyle = "#ff0033";
@@ -32,7 +30,6 @@ export default function RadarChart({ data, sweepAngle, threshold = 50 }) {
     ctx.globalAlpha = 1;
     ctx.lineWidth = 1;
 
-    // Vẽ sweep line
     ctx.save();
     ctx.rotate((sweepAngle * Math.PI) / 180);
     ctx.strokeStyle = "#00ffcc";
@@ -44,7 +41,6 @@ export default function RadarChart({ data, sweepAngle, threshold = 50 }) {
     ctx.stroke();
     ctx.restore();
 
-    // Vẽ dot phát hiện xâm nhập
     data.forEach((point) => {
       const angleRad = (point.angle * Math.PI) / 180;
       const x = Math.cos(angleRad) * point.distance;

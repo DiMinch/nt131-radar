@@ -19,7 +19,7 @@ export default function IntrusionList() {
     fetchData();
     const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
-  }, [filter]); // Thêm filter vào dependencies
+  }, [filter]);
 
   const formatTime = (timestamp) => {
     if (!timestamp) return "";
@@ -72,8 +72,6 @@ export default function IntrusionList() {
           <option value="slave">Slave Only</option>
         </select>
       </div>
-
-      {/* Custom scrollbar container */}
       <div style={{
         maxHeight: 300,
         overflowY: "auto",

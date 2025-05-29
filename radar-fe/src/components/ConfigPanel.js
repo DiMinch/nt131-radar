@@ -4,6 +4,7 @@ export default function ConfigPanel({ onConfigSaved }) {
   const [master, setMaster] = useState("");
   const [slave, setSlave] = useState("");
   const [threshold, setThreshold] = useState("");
+  const [alertEmail, setAlertEmail] = useState("");
   const [msg, setMsg] = useState("");
 
   useEffect(() => {
@@ -12,7 +13,8 @@ export default function ConfigPanel({ onConfigSaved }) {
       .then(cfg => {
         setMaster(cfg.MASTER_NODE_URL || "");
         setSlave(cfg.SLAVE_NODE_URL || "");
-        setThreshold(cfg.DANGER_THRESHOLD || 50);
+        setThreshold(cfg.DANGER_THRESHOLD || 50)
+        setAlertEmail(cfg.ALERT_EMAIL || "");
       });
   }, []);
 
@@ -23,7 +25,8 @@ export default function ConfigPanel({ onConfigSaved }) {
         body: JSON.stringify({
           MASTER_NODE_URL: master,
           SLAVE_NODE_URL: slave,
-          DANGER_THRESHOLD: threshold
+          DANGER_THRESHOLD: threshold,
+          ALERT_EMAIL: alertEmail
         })
       });
       if (res.ok) {
@@ -88,6 +91,25 @@ export default function ConfigPanel({ onConfigSaved }) {
         <input
             value={threshold}
             onChange={e=>setThreshold(e.target.value)}
+            style={{
+                width:"100%",
+                padding:"8px",
+                borderRadius:"8px",
+                border:"1px solid #00ffcc",
+                background:"#001f1f",
+                color:"#00ffcc",
+                marginTop:"4px",
+                marginBottom:"8px",
+                fontFamily:"Orbitron, monospace"
+            }}
+        />
+      </div>
+      <div style={{marginBottom:12}}>
+        <label>Alert Email: </label>
+        <input
+            type="email"
+            value={alertEmail}
+            onChange={e=>setAlertEmail(e.target.value)}
             style={{
                 width:"100%",
                 padding:"8px",

@@ -58,7 +58,6 @@ export default function RadarStatsChart() {
             tooltip: {
               callbacks: {
                 title: (ctx) => {
-                  // ctx[0].dataIndex là index của điểm
                   const angle = ctx[0].dataIndex;
                   return `Angle: ${angle}°`;
                 },

@@ -12,7 +12,6 @@ export default function RadarHeatmap() {
       .catch(() => setData([]));
   }, []);
 
-  // Gom nhóm theo thời gian
   let filtered = data;
   if (mode !== "all") {
     const now = new Date();
@@ -38,7 +37,6 @@ export default function RadarHeatmap() {
     ctx.save();
     ctx.translate(200,200);
 
-    // Tạo ma trận heatmap
     const angleStep = 10;
     const distStep = 20;
     const heat = Array(18).fill(0).map(()=>Array(10).fill(0));
@@ -48,7 +46,6 @@ export default function RadarHeatmap() {
       if(a>=0 && a<18 && d>=0 && d<10) heat[a][d]++;
     });
 
-    // Vẽ heatmap
     for(let a=0;a<18;a++) {
       for(let d=0;d<10;d++) {
         const count = heat[a][d];

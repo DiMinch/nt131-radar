@@ -14,7 +14,6 @@ export default function IntrusionTrendChart() {
       .catch(() => setData([]));
   }, []);
 
-  // Gom theo mode
   const groupMap = {};
   data.forEach(item => {
     let key = "";
