@@ -1,4 +1,5 @@
 const nodemailer = require("nodemailer");
+const { getConfig } = require("../services/config.service");
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
@@ -12,9 +13,11 @@ const transporter = nodemailer.createTransport({
 
 module.exports = async function sendAlertMail(data) {
   const { radarId, angle, distance, timestamp } = data;
+  const config = await getConfig();
+  const toEmail = config.ALERT_EMAIL || process.env.ALERT_EMAIL;
   const mailOptions = {
     from: process.env.ALERT_EMAIL,
-    to: process.env.ALERT_EMAIL, // gửi về chính mình (demo)
+    to: toEmail,
     subject: "🚨 Phát hiện xâm nhập!",
     html: `
       <h3>Radar ID: ${radarId}</h3>

@@ -56,18 +56,15 @@ void handleRoot() {
     function drawRadar() {
       ctx.clearRect(0, 0, 300, 300);
 
-      // Draw circles
       ctx.strokeStyle = '#00ffcc';
       ctx.beginPath(); ctx.arc(r, r, r - 1, 0, 2 * Math.PI); ctx.stroke();
       ctx.beginPath(); ctx.arc(r, r, r / 2, 0, 2 * Math.PI); ctx.stroke();
 
-      // Draw sweep line
       const sweepRad = sweep * Math.PI / 180;
       const x = r + (r - 10) * Math.cos(sweepRad);
       const y = r - (r - 10) * Math.sin(sweepRad);
       ctx.beginPath(); ctx.moveTo(r, r); ctx.lineTo(x, y); ctx.stroke();
 
-      // Draw detected dot
       if (distance > 0 && distance < 300) {
         const dotRad = angle * Math.PI / 180;
         const px = r + distance * Math.cos(dotRad);
@@ -109,7 +106,7 @@ float getDistance() {
   delayMicroseconds(2);
   digitalWrite(TRIG_PIN, HIGH);delayMicroseconds(10);
   digitalWrite(TRIG_PIN, LOW);
-  long duration = pulseIn(ECHO_PIN, HIGH, 20000); // timeout tránh treo
+  long duration = pulseIn(ECHO_PIN, HIGH, 20000);
   return duration > 0 ? (duration * 0.034 / 2) : -1;
 }
 
@@ -154,7 +151,7 @@ void loop() {
   server.handleClient();
 
   unsigned long now = millis();
-  if (now - lastMoveTime > 200) {  // Di chuyển mỗi 200ms
+  if (now - lastMoveTime > 200) {
     lastMoveTime = now;
 
     if (increasing) {
@@ -166,7 +163,7 @@ void loop() {
     }
 
     servo.write(angle);
-    delay(100); // Cho servo ổn định tí
+    delay(100);
     distance = getDistance();
 
     Serial.printf("Angle: %d | Distance: %.2f\n", angle, distance);

@@ -2,7 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const configPath = path.join(__dirname, "../../config.json");
 
-function getConfigValue(key, fallback) {
+exports.getConfigValue = async (key, fallback) => {
   try {
     if (fs.existsSync(configPath)) {
       const config = JSON.parse(fs.readFileSync(configPath, "utf8"));
@@ -14,7 +14,7 @@ function getConfigValue(key, fallback) {
   return process.env[key] || fallback;
 }
 
-function getConfig() {
+exports.getConfig = async () => {
   try {
     if (fs.existsSync(configPath)) {
       return JSON.parse(fs.readFileSync(configPath, "utf8"));
@@ -25,18 +25,24 @@ function getConfig() {
   return {};
 }
 
-async function saveConfig({ MASTER_NODE_URL, SLAVE_NODE_URL, DANGER_THRESHOLD }) {
+function normalizeUrl(ip) {
+  if (!ip) return "";
+  if (!/^https?:\/\//.test(ip)) return "http://" + ip;
+  return ip;
+}
+
+exports.saveConfig = async ({ MASTER_NODE_URL, SLAVE_NODE_URL, DANGER_THRESHOLD }) => {
   try {
-    let config = getConfig();
-    if (MASTER_NODE_URL) config.MASTER_NODE_URL = MASTER_NODE_URL;
-    if (SLAVE_NODE_URL) config.SLAVE_NODE_URL = SLAVE_NODE_URL;
+    let config = await exports.getConfig();
+    if (MASTER_NODE_URL) config.MASTER_NODE_URL = normalizeUrl(MASTER_NODE_URL);
+    if (SLAVE_NODE_URL) config.SLAVE_NODE_URL = normalizeUrl(SLAVE_NODE_URL);
     if (DANGER_THRESHOLD !== undefined) {
       config.DANGER_THRESHOLD = Number(DANGER_THRESHOLD);
     }
+    if (ALERT_EMAIL) config.ALERT_EMAIL = ALERT_EMAIL;
     fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
     console.log("Config saved:", config);
 
-    // Gửi IP mới lên node master nếu có đủ thông tin
     if (config.MASTER_NODE_URL && config.SLAVE_NODE_URL) {
       try {
         const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
@@ -59,9 +65,3 @@ async function saveConfig({ MASTER_NODE_URL, SLAVE_NODE_URL, DANGER_THRESHOLD })
     throw err;
   }
 }
-
-module.exports = {
-  getConfig,
-  saveConfig,
-  getConfigValue
-};

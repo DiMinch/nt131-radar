@@ -67,11 +67,11 @@ exports.getCurrentReadings = async () => {
     const masterData = await fetchWithTimeout(masterUrl);
     const slaveData = await fetchWithTimeout(slaveUrl);
 
-    // --- NEW: Xử lý intrusion và broadcast ---
     const DANGER_THRESHOLD = Number(getConfigValue("DANGER_THRESHOLD", 50));
     const now = new Date().toISOString();
 
-    // Helper để xử lý và lưu intrusion
+    let lastIntrusionState = { master: false, slave: false };
+
     async function handleScan(data, radarId) {
       if (!data) return null;
       const scanData = {
@@ -83,10 +83,11 @@ exports.getCurrentReadings = async () => {
       };
       ws.broadcast(scanData);
       await db.collection("radar_scans").add(scanData);
-      if (scanData.isIntrusion) {
+      if (scanData.isIntrusion && !lastIntrusionState[radarId]) {
         await db.collection("intrusion_logs").add(scanData);
         await sendAlertMail(scanData);
       }
+      lastIntrusionState[radarId] = scanData.isIntrusion;
       return scanData;
     }
 
