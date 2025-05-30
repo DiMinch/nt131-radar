@@ -1,5 +1,6 @@
 {
-  "DANGER_THRESHOLD": 5,
-  "MASTER_NODE_URL": "http://192.168.204.46",
-  "SLAVE_NODE_URL": "http://192.168.204.86"
+  "DANGER_THRESHOLD": 15,
+  "MASTER_NODE_URL": "http://192.168.204.10",
+  "SLAVE_NODE_URL": "http://192.168.204.203",
+  "ALERT_EMAIL": "kiridahoshi@gmail.com"
 }

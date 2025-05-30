@@ -12,7 +12,7 @@ export default function IntrusionList() {
 
       fetch(url)
         .then((res) => res.json())
-        .then(setIntrusions)
+        .then(data => setIntrusions(Array.isArray(data) ? data : []))
         .catch(() => setIntrusions([]));
     };
   

@@ -12,11 +12,13 @@ ESP8266WebServer server(80);
 const char* ssid = "FamilyMart";
 const char* password = "ministop";
 
-String node2_host = "192.168.204.86";
+String node2_host = "192.168.204.252";
 
 Servo servo;
 int angle = 0;
 float distance = 0;
+int angle2 = 0;
+float distance2 = 0;
 bool increasing = true;
 unsigned long lastMoveTime = 0;
 unsigned long lastFetchNode2 = 0;
@@ -132,11 +134,33 @@ void handleRoot() {
 float getDistance() {
   digitalWrite(TRIG_PIN, LOW);
   delayMicroseconds(2);
-  digitalWrite(TRIG_PIN, HIGH);
-  delayMicroseconds(10);
+  digitalWrite(TRIG_PIN, HIGH);delayMicroseconds(10);
   digitalWrite(TRIG_PIN, LOW);
-  long duration = pulseIn(ECHO_PIN, HIGH, 20000);
+  long duration = pulseIn(ECHO_PIN, HIGH, 40000);
   return duration > 0 ? (duration * 0.034 / 2) : -1;
+}
+
+void fetchNode2Data() {
+  HTTPClient http;
+  WiFiClient client;
+  String url = "http://" + node2_host + "/data";
+  http.begin(client, url);
+  int httpCode = http.GET();
+  if (httpCode == 200) {
+    String payload = http.getString();
+    DynamicJsonDocument doc(128);
+    DeserializationError error = deserializeJson(doc, payload);
+    if (!error) {
+      if (doc.containsKey("angle")) angle2 = doc["angle"];
+      if (doc.containsKey("distance")) distance2 = doc["distance"];
+      Serial.printf("[Node2] Angle: %d | Distance: %.2f cm\n", angle2, distance2);
+    } else {
+      Serial.println("[Node2] JSON parse error");
+    }
+  } else {
+    Serial.println("[Node2] HTTP GET failed");
+  }
+  http.end();
 }
 
 void setup() {
@@ -166,13 +190,23 @@ void setup() {
   server.on("/", handleRoot);
 
   server.on("/data", []() {
-    DynamicJsonDocument doc(128);
-    doc["angle"] = angle;
-    doc["distance"] = distance;
+    DynamicJsonDocument doc(256);
+    JsonObject masterObj = doc.createNestedObject("master");
+    masterObj["radarId"] = "master";
+    masterObj["angle"] = angle;
+    masterObj["distance"] = distance;
+    masterObj["timestamp"] = String(millis());
+
+    JsonObject slaveObj = doc.createNestedObject("slave");
+    slaveObj["radarId"] = "slave";
+    slaveObj["angle"] = angle2;
+    slaveObj["distance"] = distance2;
+    slaveObj["timestamp"] = String(millis());
+
     String res;
     serializeJson(doc, res);
     server.send(200, "application/json", res);
-  });
+});
 
   server.on("/slave", []() {
     HTTPClient http;
@@ -216,15 +250,28 @@ void loop() {
   unsigned long now = millis();
   if (now - lastMoveTime >= 200) {
     lastMoveTime = now;
-    angle = increasing ? angle + 10 : angle - 10;
-    if (angle >= 180) increasing = false;
-    if (angle <= 0) increasing = true;
+    if (increasing) {
+      angle += 10;
+      if (angle >= 180) increasing = false;
+    } else {
+      angle -= 10;
+      if (angle <= 0) increasing = true;
+    }
 
     servo.write(angle);
-    distance = getDistance();
+    float dist = getDistance();
+    if (dist < 0 && distance > 0) {
+      dist = distance;
+    }
+    distance = dist;
 
     Serial.printf("Angle: %d | Distance: %.2f cm\n", angle, distance);
     Serial.print("IP Node Master: ");
     Serial.println(WiFi.localIP());
+  }
+
+  if (now - lastFetchNode2 >= 1000) {
+    lastFetchNode2 = now;
+    fetchNode2Data(); // update angle2, distance2
   }
 }

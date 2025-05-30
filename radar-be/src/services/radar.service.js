@@ -3,8 +3,10 @@ const ws = require("../ws");
 const sendAlertMail = require("../utils/mailer");
 const { getConfigValue } = require("./config.service");
 
+let lastIntrusionState = { master: false, slave: false };
+
 exports.processRadarScan = async ({ angle, distance, radarId, timestamp }) => {
-  const DANGER_THRESHOLD = Number(getConfigValue("DANGER_THRESHOLD", 50));
+  const DANGER_THRESHOLD = Number(await getConfigValue("DANGER_THRESHOLD", 50));
   const isIntrusion = distance < DANGER_THRESHOLD;
 
   const scanData = {
@@ -19,11 +21,11 @@ exports.processRadarScan = async ({ angle, distance, radarId, timestamp }) => {
 
   await db.collection("radar_scans").add(scanData);
 
-  if (isIntrusion) {
+  if (scanData.isIntrusion && !lastIntrusionState[radarId]) {
     await db.collection("intrusion_logs").add(scanData);
     await sendAlertMail(scanData);
   }
-
+  lastIntrusionState[radarId] = scanData.isIntrusion;
   return {
     message: "Scan received",
     isIntrusion,
@@ -47,7 +49,7 @@ exports.getIntrusions = async (radarId) => {
 exports.getCurrentReadings = async () => {
   try {
     const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
-    const timeout = 2000;
+    const timeout = 4000;
 
     const fetchWithTimeout = async (url) => {
       const controller = new AbortController();
@@ -55,22 +57,26 @@ exports.getCurrentReadings = async () => {
       try {
         const res = await fetch(url, { signal: controller.signal });
         clearTimeout(id);
-        return await res.json();
+        const text = await res.text();
+        console.log("Fetch", url, "->", text.slice(0, 100));
+        try {
+          return JSON.parse(text);
+        } catch (e) {
+          console.error("JSON parse error:", e.message);
+          return null;
+        }
       } catch (e) {
         clearTimeout(id);
+        console.error("Fetch error:", url, e.message);
         return null;
       }
     };
 
-    const masterUrl = getConfigValue("MASTER_NODE_URL", "http://localhost:3001") + "/data";
-    const slaveUrl = getConfigValue("SLAVE_NODE_URL", "http://localhost:3001") + "/data";
+    const masterUrl = (await getConfigValue("MASTER_NODE_URL", "http://localhost:3001")) + "/data";    
     const masterData = await fetchWithTimeout(masterUrl);
-    const slaveData = await fetchWithTimeout(slaveUrl);
 
-    const DANGER_THRESHOLD = Number(getConfigValue("DANGER_THRESHOLD", 50));
+    const DANGER_THRESHOLD = Number(await getConfigValue("DANGER_THRESHOLD", 50));
     const now = new Date().toISOString();
-
-    let lastIntrusionState = { master: false, slave: false };
 
     async function handleScan(data, radarId) {
       if (!data) return null;
@@ -91,8 +97,11 @@ exports.getCurrentReadings = async () => {
       return scanData;
     }
 
-    const masterScan = await handleScan(masterData, "master");
-    const slaveScan = await handleScan(slaveData, "slave");
+    let masterScan = null, slaveScan = null;
+    if (masterData && masterData.master && masterData.slave) {
+      masterScan = await handleScan(masterData.master, "master");
+      slaveScan = await handleScan(masterData.slave, "slave");
+    }
 
     return { master: masterScan, slave: slaveScan };
   } catch (e) {
@@ -100,11 +109,18 @@ exports.getCurrentReadings = async () => {
   }
 };
 
+let statsCache = { data: null, ts: 0 };
 exports.getSystemStats = async () => {
+  const now = Date.now();
+  if (statsCache.data && now - statsCache.ts < 10000) return statsCache.data;
   const scansSnapshot = await db.collection("radar_scans").get();
   const intrusionsSnapshot = await db.collection("intrusion_logs").get();
-  return {
-    totalScans: scansSnapshot.size,
-    totalIntrusions: intrusionsSnapshot.size
+  statsCache = {
+    data: {
+      totalScans: scansSnapshot.size,
+      totalIntrusions: intrusionsSnapshot.size
+    },
+    ts: now
   };
+  return statsCache.data;
 };

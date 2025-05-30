@@ -15,9 +15,10 @@ exports.getConfigValue = async (key, fallback) => {
 }
 
 exports.getConfig = async () => {
-  try {
+  try {  
     if (fs.existsSync(configPath)) {
-      return JSON.parse(fs.readFileSync(configPath, "utf8"));
+      const content = fs.readFileSync(configPath, "utf8");
+      return JSON.parse(content);
     }
   } catch (err) {
     console.error("Error reading config:", err);
@@ -31,7 +32,7 @@ function normalizeUrl(ip) {
   return ip;
 }
 
-exports.saveConfig = async ({ MASTER_NODE_URL, SLAVE_NODE_URL, DANGER_THRESHOLD }) => {
+exports.saveConfig = async ({ MASTER_NODE_URL, SLAVE_NODE_URL, DANGER_THRESHOLD, ALERT_EMAIL }) => {
   try {
     let config = await exports.getConfig();
     if (MASTER_NODE_URL) config.MASTER_NODE_URL = normalizeUrl(MASTER_NODE_URL);

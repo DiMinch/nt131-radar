@@ -11,9 +11,9 @@ export default function ConfigPanel({ onConfigSaved }) {
     fetch(`${process.env.REACT_APP_API_URL}/api/radar/config`)
       .then(res => res.json())
       .then(cfg => {
-        setMaster(cfg.MASTER_NODE_URL || "");
-        setSlave(cfg.SLAVE_NODE_URL || "");
-        setThreshold(cfg.DANGER_THRESHOLD || 50)
+        setMaster(cfg.MASTER_NODE_URL?.replace(/^https?:\/\//, "") || "");
+        setSlave(cfg.SLAVE_NODE_URL?.replace(/^https?:\/\//, "") || "");
+        setThreshold(cfg.DANGER_THRESHOLD || 0);
         setAlertEmail(cfg.ALERT_EMAIL || "");
       });
   }, []);

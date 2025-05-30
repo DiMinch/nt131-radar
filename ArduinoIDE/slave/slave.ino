@@ -106,7 +106,7 @@ float getDistance() {
   delayMicroseconds(2);
   digitalWrite(TRIG_PIN, HIGH);delayMicroseconds(10);
   digitalWrite(TRIG_PIN, LOW);
-  long duration = pulseIn(ECHO_PIN, HIGH, 20000);
+  long duration = pulseIn(ECHO_PIN, HIGH, 40000);
   return duration > 0 ? (duration * 0.034 / 2) : -1;
 }
 
@@ -136,14 +136,15 @@ void setup() {
 
   server.on("/", handleRoot);
   server.on("/data", []() {
-    String json = "{";
-    json += "\"radarId\":\"slave\",";
-    json += "\"angle\":" + String(angle) + ",";
-    json += "\"distance\":" + String(distance) + ",";
-    json += "\"timestamp\":\"" + String(millis()) + "\"";
-    json += "}";
-    server.send(200, "application/json", json);
-});
+    DynamicJsonDocument doc(128);
+    doc["radarId"] = "slave";
+    doc["angle"] = angle;
+    doc["distance"] = distance;
+    doc["timestamp"] = String(millis());
+    String res;
+    serializeJson(doc, res);
+    server.send(200, "application/json", res);
+  });
   server.begin();
 }
 
@@ -164,7 +165,11 @@ void loop() {
 
     servo.write(angle);
     delay(100);
-    distance = getDistance();
+    float dist = getDistance();
+    if (dist < 0 && distance > 0) {
+      dist = distance;
+    }
+    distance = dist;
 
     Serial.printf("Angle: %d | Distance: %.2f\n", angle, distance);
     Serial.print("IP Node Slave: ");
